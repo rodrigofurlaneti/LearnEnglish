@@ -1,35 +1,34 @@
-using LearnEnglish.API.Data;
-using Microsoft.EntityFrameworkCore;
+using LearnEnglish.Application;
+using LearnEnglish.Infrastructure;
+using LearnEnglish.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EF Core + SQL Server
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()));
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() {
+    c.SwaggerDoc("v1", new()
+    {
         Title = "LearnEnglish API",
         Version = "v1",
-        Description = "API para plataforma de ensino de inglês - Teacher Katrine Riccaldoni"
+        Description = "API para plataforma de ensino de inglês — Teacher Katrine Riccaldoni"
     });
 });
 
-// CORS — libera o frontend local
 builder.Services.AddCors(options =>
-{
     options.AddDefaultPolicy(policy =>
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyHeader());
-});
+              .AllowAnyHeader()));
 
 var app = builder.Build();
+
+// ExceptionHandlingMiddleware MUST be first
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LearnEnglish v1"));
@@ -37,5 +36,4 @@ app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LearnEnglis
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
