@@ -1,8 +1,25 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet, Navigate } from 'react-router-dom';
 import { Nav } from '../../design-system/components/Nav';
-import { LessonsPage } from '../../features/lessons/pages/LessonsPage';
-import { LessonDetailPage } from '../../features/lessons/pages/LessonDetailPage';
-import { UserSetupPage } from '../../features/users/pages/UserSetupPage';
+import { Spinner } from '../../design-system/components/Spinner';
+
+const LessonsPage = lazy(() =>
+  import('../../features/lessons/pages/LessonsPage').then((m) => ({ default: m.LessonsPage })),
+);
+const LessonDetailPage = lazy(() =>
+  import('../../features/lessons/pages/LessonDetailPage').then((m) => ({ default: m.LessonDetailPage })),
+);
+const UserSetupPage = lazy(() =>
+  import('../../features/users/pages/UserSetupPage').then((m) => ({ default: m.UserSetupPage })),
+);
+
+function PageFallback() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-20)' }}>
+      <Spinner size={28} />
+    </div>
+  );
+}
 
 function Layout() {
   return (
@@ -15,8 +32,23 @@ function Layout() {
           padding: 'var(--space-8) var(--space-6)',
         }}
       >
-        <Outlet />
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
+    </div>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <div style={{ textAlign: 'center', padding: 'var(--space-20)', color: 'var(--color-ink-secondary)' }}>
+      <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', color: 'var(--color-ink)' }}>
+        404 - Page not found
+      </h1>
+      <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>
+        The page you are looking for does not exist.
+      </p>
     </div>
   );
 }
@@ -29,6 +61,7 @@ export const router = createBrowserRouter([
       { path: '/lessons', element: <LessonsPage /> },
       { path: '/lessons/:id', element: <LessonDetailPage /> },
       { path: '/setup', element: <UserSetupPage /> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

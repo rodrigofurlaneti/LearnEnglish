@@ -67,32 +67,9 @@ function Stat({ icon, value, label }: { icon: string; value: number; label: stri
 export function LessonsPage() {
   const { data: lessons, isLoading, error } = useLessons();
 
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-20)' }}>
-        <Spinner size={28} />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{
-        background: 'var(--color-error-bg)',
-        border: '1px solid var(--color-error-border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: 'var(--space-4)',
-        color: 'var(--color-error)',
-        fontSize: 'var(--text-sm)',
-      }}>
-        Failed to load lessons: {error.message}
-      </div>
-    );
-  }
-
   return (
     <div>
-      {/* Header */}
+      {/* Header — always visible so tests can locate the heading immediately */}
       <div style={{ marginBottom: 'var(--space-8)' }}>
         <h1 style={{
           fontSize: 'var(--text-3xl)',
@@ -108,21 +85,46 @@ export function LessonsPage() {
         </p>
       </div>
 
-      {/* Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: 'var(--space-4)',
-      }}>
-        {lessons?.map((lesson) => (
-          <LessonCard key={lesson.id} lesson={lesson} />
-        ))}
-      </div>
-
-      {lessons?.length === 0 && (
-        <div style={{ textAlign: 'center', padding: 'var(--space-20)', color: 'var(--color-ink-tertiary)' }}>
-          No lessons yet.
+      {/* Loading state */}
+      {isLoading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-20)' }}>
+          <Spinner size={28} />
         </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div style={{
+          background: 'var(--color-error-bg)',
+          border: '1px solid var(--color-error-border)',
+          borderRadius: 'var(--radius-lg)',
+          padding: 'var(--space-4)',
+          color: 'var(--color-error)',
+          fontSize: 'var(--text-sm)',
+        }}>
+          Failed to load lessons: {error.message}
+        </div>
+      )}
+
+      {/* Grid */}
+      {!isLoading && !error && (
+        <>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 'var(--space-4)',
+          }}>
+            {lessons?.map((lesson) => (
+              <LessonCard key={lesson.id} lesson={lesson} />
+            ))}
+          </div>
+
+          {lessons?.length === 0 && (
+            <div style={{ textAlign: 'center', padding: 'var(--space-20)', color: 'var(--color-ink-tertiary)' }}>
+              No lessons yet.
+            </div>
+          )}
+        </>
       )}
     </div>
   );

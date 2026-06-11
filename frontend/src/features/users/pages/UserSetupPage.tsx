@@ -78,7 +78,7 @@ export function UserSetupPage() {
         </div>
 
         <Card>
-          <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <Input
               {...register('name')}
               label="Your name"

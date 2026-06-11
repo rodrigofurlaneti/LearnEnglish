@@ -30,27 +30,49 @@ public sealed class GetLessonByIdQueryHandler
 
         var slides = lesson.Slides
             .OrderBy(s => s.OrderIndex)
-            .Select(s => new SlideDto(s.Id, s.OrderIndex, s.SlideTitle, s.ContentType.ToString(), s.Content.Json))
+            .Select(s => new SlideDto(
+                s.Id,
+                s.SlideTitle ?? s.ContentType.ToString(),
+                s.Content.Json,
+                null,
+                null,
+                s.OrderIndex,
+                s.ContentType.ToString()))
             .ToList()
             .AsReadOnly();
 
         var exerciseDtos = exercises
             .Where(e => e.IsActive)
             .OrderBy(e => e.OrderIndex)
-            .Select(e => new ExerciseDto(e.Id, e.ExerciseType.ToString(), e.Question, e.OptionsJson, e.OrderIndex))
+            .Select(e => new ExerciseDto(
+                e.Id,
+                e.ExerciseType.ToString(),
+                e.Question,
+                e.CorrectAnswer,
+                e.OptionsJson,
+                e.Explanation,
+                e.OrderIndex))
             .ToList()
             .AsReadOnly();
 
         var dto = new LessonDetailDto(
             lesson.Id,
-            lesson.LessonNumber.Value,
             lesson.Title,
-            lesson.Topic,
             lesson.Description,
-            lesson.OrderIndex,
+            DeriveLevel(lesson.LessonNumber.Value),
+            lesson.Slides.Count * 2,
+            lesson.Slides.Count,
+            exerciseDtos.Count,
             slides,
             exerciseDtos);
 
         return Result.Success(dto);
     }
+
+    private static string DeriveLevel(int lessonNumber) => lessonNumber switch
+    {
+        <= 2 => "Beginner",
+        <= 4 => "Intermediate",
+        _    => "Advanced",
+    };
 }

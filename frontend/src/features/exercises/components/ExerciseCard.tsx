@@ -88,8 +88,10 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
   };
 
   const typeLabel: Record<string, string> = {
+    FillBlank: 'Fill in the blank',
     FillInTheBlank: 'Fill in the blank',
     MultipleChoice: 'Multiple choice',
+    IdentifyPast: 'Fill in the blank',
     Translation: 'Translation',
     Pronunciation: 'Pronunciation',
   };
@@ -112,12 +114,6 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
         </div>
 
         {/* Answer form — only if user exists and not yet answered */}
-        {!user && (
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-tertiary)' }}>
-            <a href="/setup" style={{ color: 'var(--color-ink)', textDecoration: 'underline' }}>Set up your profile</a> to submit answers.
-          </p>
-        )}
-
         {user && !isSuccess && (
           <>
             {isMultipleChoice ? (
@@ -128,14 +124,15 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
                   selected={mcSelected}
                   disabled={isPending}
                 />
-                <Button
-                  onClick={onMcSubmit}
-                  loading={isPending}
-                  disabled={!mcSelected}
-                  size="sm"
-                >
-                  Submit
-                </Button>
+                {mcSelected && (
+                  <Button
+                    onClick={onMcSubmit}
+                    loading={isPending}
+                    size="sm"
+                  >
+                    Submit
+                  </Button>
+                )}
               </div>
             ) : (
               <form onSubmit={handleSubmit(onFreeTextSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>

@@ -1,25 +1,30 @@
 namespace LearnEnglish.Application.Lessons.Queries.GetLessonById;
 
 public sealed record LessonDetailDto(
-    Guid LessonId,
-    int LessonNumber,
+    Guid Id,
     string Title,
-    string Topic,
     string Description,
-    int OrderIndex,
+    string Level,
+    int DurationMinutes,
+    int SlidesCount,
+    int ExercisesCount,
     IReadOnlyList<SlideDto> Slides,
     IReadOnlyList<ExerciseDto> Exercises);
 
 public sealed record SlideDto(
-    Guid SlideId,
+    Guid Id,
+    string Title,
+    string Content,
+    string? ImageUrl,
+    string? AudioUrl,
     int OrderIndex,
-    string? SlideTitle,
-    string ContentType,
-    string Content);
+    string SlideType);
 
 public sealed record ExerciseDto(
-    Guid ExerciseId,
+    Guid Id,
     string ExerciseType,
     string Question,
+    string CorrectAnswer,
     string? OptionsJson,
+    string? Explanation,
     int OrderIndex);

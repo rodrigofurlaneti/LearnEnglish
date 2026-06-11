@@ -1,0 +1,17 @@
+{
+  "name": "learnenglish-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests — functional and non-functional — for LearnEnglish frontend",
+  "scripts": {
+    "test": "playwright test",
+    "test:functional": "playwright test tests/functional",
+    "test:non-functional": "playwright test tests/non-functional",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@axe-core/playwright": "^4.10.0"
+  }
+}

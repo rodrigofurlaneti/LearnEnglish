@@ -18,6 +18,19 @@ public sealed class ExerciseRepository(AppDbContext context)
         return exercises.AsReadOnly();
     }
 
+    public async Task<Dictionary<Guid, int>> GetCountsByLessonIdsAsync(
+        IEnumerable<Guid> lessonIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = lessonIds.ToList();
+        return await Context.Exercises
+            .AsNoTracking()
+            .Where(e => ids.Contains(e.LessonId) && e.IsActive)
+            .GroupBy(e => e.LessonId)
+            .Select(g => new { LessonId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.LessonId, x => x.Count, cancellationToken);
+    }
+
     public async Task AddAttemptAsync(ExerciseAttempt attempt, CancellationToken cancellationToken = default) =>
         await Context.ExerciseAttempts.AddAsync(attempt, cancellationToken);
 

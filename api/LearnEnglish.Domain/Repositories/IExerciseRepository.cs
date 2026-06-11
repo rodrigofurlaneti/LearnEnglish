@@ -5,6 +5,7 @@ namespace LearnEnglish.Domain.Repositories;
 public interface IExerciseRepository : IRepository<Exercise>
 {
     Task<IReadOnlyList<Exercise>> GetByLessonIdAsync(Guid lessonId, CancellationToken cancellationToken = default);
+    Task<Dictionary<Guid, int>> GetCountsByLessonIdsAsync(IEnumerable<Guid> lessonIds, CancellationToken cancellationToken = default);
     Task AddAttemptAsync(ExerciseAttempt attempt, CancellationToken cancellationToken = default);
     Task AddInteractionAsync(WordInteraction interaction, CancellationToken cancellationToken = default);
 }
