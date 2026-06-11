@@ -1,14 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useUserStore } from '../../core/store/userStore';
 
-interface NavItem {
-  label: string;
-  to: string;
-}
-
-const navItems: NavItem[] = [
-  { label: 'Lessons', to: '/lessons' },
-];
+const navItems = [{ label: 'Lessons', to: '/lessons' }];
 
 export function Nav() {
   const location = useLocation();
@@ -21,8 +14,8 @@ export function Nav() {
         top: 0,
         zIndex: 50,
         height: 'var(--nav-height)',
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(12px)',
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'saturate(180%) blur(12px)',
         borderBottom: '1px solid var(--color-border)',
         display: 'flex',
         alignItems: 'center',
@@ -46,13 +39,33 @@ export function Nav() {
             fontSize: 'var(--text-sm)',
             fontWeight: 'var(--weight-semibold)',
             color: 'var(--color-ink)',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.02em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
           }}
         >
+          <span
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-ink)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            L
+          </span>
           LearnEnglish
         </Link>
 
-        {/* Links */}
+        {/* Nav links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)', flex: 1 }}>
           {navItems.map((item) => {
             const active = location.pathname.startsWith(item.to);
@@ -61,12 +74,13 @@ export function Nav() {
                 key={item.to}
                 to={item.to}
                 style={{
-                  padding: 'var(--space-1) var(--space-3)',
+                  padding: '4px var(--space-3)',
                   fontSize: 'var(--text-sm)',
                   fontWeight: active ? 'var(--weight-medium)' : 'var(--weight-normal)',
                   color: active ? 'var(--color-ink)' : 'var(--color-ink-secondary)',
                   borderRadius: 'var(--radius-md)',
                   background: active ? 'var(--color-canvas-subtle)' : 'transparent',
+                  border: active ? '1px solid var(--color-border)' : '1px solid transparent',
                   transition: 'all var(--transition-fast)',
                 }}
               >
@@ -76,7 +90,7 @@ export function Nav() {
           })}
         </div>
 
-        {/* User */}
+        {/* User / CTA */}
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <div
@@ -89,13 +103,15 @@ export function Nav() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#fff',
-                fontSize: 'var(--text-xs)',
-                fontWeight: 'var(--weight-semibold)',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '-0.02em',
+                flexShrink: 0,
               }}
             >
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-secondary)' }}>
+            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-medium)', color: 'var(--color-ink)', letterSpacing: '-0.01em' }}>
               {user.name}
             </span>
           </div>
@@ -103,10 +119,20 @@ export function Nav() {
           <Link
             to="/setup"
             style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              height: 30,
+              padding: '0 var(--space-4)',
               fontSize: 'var(--text-sm)',
               fontWeight: 'var(--weight-medium)',
-              color: 'var(--color-ink-secondary)',
+              color: '#fff',
+              background: 'var(--color-ink)',
+              borderRadius: 'var(--radius-full)',
+              letterSpacing: '-0.01em',
+              transition: 'background var(--transition-fast)',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-accent-hover)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-ink)')}
           >
             Get started
           </Link>

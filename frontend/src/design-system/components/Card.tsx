@@ -14,18 +14,16 @@ const paddingMap = {
 export function Card({ padding = 'md', hoverable, style, onMouseEnter, onMouseLeave, ...props }: CardProps) {
   const handleMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
     if (hoverable) {
-      e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-      e.currentTarget.style.transform = 'translateY(-1px)';
-      e.currentTarget.style.borderColor = 'var(--color-border-strong)';
+      e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+      e.currentTarget.style.transform = 'translateY(-2px)';
     }
     onMouseEnter?.(e);
   };
 
   const handleMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
     if (hoverable) {
-      e.currentTarget.style.boxShadow = 'var(--shadow-xs)';
+      e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
       e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.borderColor = 'var(--color-border)';
     }
     onMouseLeave?.(e);
   };
@@ -36,10 +34,9 @@ export function Card({ padding = 'md', hoverable, style, onMouseEnter, onMouseLe
       onMouseLeave={handleMouseLeave}
       style={{
         background: 'var(--color-canvas)',
-        border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-xl)',
         padding: paddingMap[padding],
-        boxShadow: 'var(--shadow-xs)',
+        boxShadow: hoverable ? 'var(--shadow-sm)' : 'var(--shadow-xs)',
         transition: hoverable ? 'all var(--transition-base)' : undefined,
         cursor: hoverable ? 'pointer' : undefined,
         ...style,
@@ -67,10 +64,11 @@ export function CardTitle({ style, ...props }: HTMLAttributes<HTMLHeadingElement
   return (
     <h3
       style={{
-        fontSize: 'var(--text-lg)',
+        fontSize: 'var(--text-base)',
         fontWeight: 'var(--weight-semibold)',
         color: 'var(--color-ink)',
         lineHeight: 'var(--leading-tight)',
+        letterSpacing: '-0.02em',
         ...style,
       }}
       {...props}
