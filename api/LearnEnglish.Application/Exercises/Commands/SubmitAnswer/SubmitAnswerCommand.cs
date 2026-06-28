@@ -8,4 +8,4 @@ public sealed record SubmitAnswerCommand(
     Guid ExerciseId,
     string UserAnswer) : IRequest<Result<SubmitAnswerResponse>>;
 
-public sealed record SubmitAnswerResponse(bool IsCorrect, string? Explanation);
+public sealed record SubmitAnswerResponse(bool IsCorrect, string CorrectAnswer, string? Explanation);

@@ -29,10 +29,22 @@ public sealed class SubmitAnswerCommandHandler
         if (!exercise.IsActive)
             return Result.Failure<SubmitAnswerResponse>(new Error("Exercise.Inactive", "This exercise is no longer active."));
 
-        var attempt = ExerciseAttempt.Record(request.UserId, exercise, request.UserAnswer);
-        await _exerciseRepository.AddAttemptAsync(attempt, cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
+        // Evaluate correctness first — always returned, even if the DB save fails
+        var isCorrect = exercise.CheckAnswer(request.UserAnswer);
 
-        return Result.Success(new SubmitAnswerResponse(attempt.IsCorrect, exercise.Explanation));
+        // Silently skip saving if the user row no longer exists (FK violation)
+        // or any other transient DB error, so the learner always gets feedback.
+        try
+        {
+            var attempt = ExerciseAttempt.Record(request.UserId, exercise, request.UserAnswer);
+            await _exerciseRepository.AddAttemptAsync(attempt, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Intentionally swallowed: correctness is still returned below.
+        }
+
+        return Result.Success(new SubmitAnswerResponse(isCorrect, exercise.CorrectAnswer, exercise.Explanation));
     }
 }

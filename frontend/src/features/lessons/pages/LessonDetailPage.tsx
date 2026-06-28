@@ -1269,6 +1269,8 @@ export function LessonDetailPage() {
   const user = useUserStore((s) => s.user);
   const [slideIndex, setSlideIndex] = useState(0);
   const [showExercises, setShowExercises] = useState(false);
+  const [exerciseIndex, setExerciseIndex] = useState(0);
+  const [exerciseScores, setExerciseScores] = useState<boolean[]>([]);
 
   const slides = lesson ? [...lesson.slides].sort((a, b) => a.orderIndex - b.orderIndex) : [];
 
@@ -1372,7 +1374,10 @@ export function LessonDetailPage() {
               return (
                 <button
                   key={tab}
-                  onClick={() => setShowExercises(tab === 'Exercises')}
+                  onClick={() => {
+                    setShowExercises(tab === 'Exercises');
+                    if (tab === 'Exercises') { setExerciseIndex(0); setExerciseScores([]); }
+                  }}
                   style={{
                     flex: 1,
                     padding: 'var(--space-2) var(--space-4)',
@@ -1444,53 +1449,162 @@ export function LessonDetailPage() {
             </div>
           )}
 
-          {/* ── Exercises panel ── */}
+          {/* ── Exercises carousel ── */}
           {showExercises && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+
+              {/* No exercises */}
+              {exercises.length === 0 && (
+                <div style={{
+                  textAlign: 'center', padding: 'var(--space-16)',
+                  color: 'var(--color-ink-tertiary)', fontSize: 'var(--text-sm)',
+                  background: 'var(--color-canvas-soft)', borderRadius: 'var(--radius-xl)',
+                  border: '1px dashed var(--color-border-strong)',
+                }}>
+                  No exercises for this lesson yet.
+                </div>
+              )}
+
+              {/* No profile banner */}
               {!user && exercises.length > 0 && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--space-3)',
-                    padding: 'var(--space-4)',
-                    background: 'var(--color-canvas-soft)',
-                    borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--color-border)',
-                  }}
-                >
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+                  padding: 'var(--space-4)', background: 'var(--color-canvas-soft)',
+                  borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)',
+                }}>
                   <span style={{ fontSize: 20, flexShrink: 0 }}>👤</span>
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-secondary)' }}>
-                    <a
-                      href="/setup"
-                      style={{ color: 'var(--color-ink)', fontWeight: 'var(--weight-medium)', textDecoration: 'underline', textUnderlineOffset: 3 }}
-                    >
-                      Set up your profile
-                    </a>
-                    {' '}to track progress and submit answers.
+                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-secondary)', margin: 0 }}>
+                    <a href="/setup" style={{ color: 'var(--color-ink)', fontWeight: 'var(--weight-medium)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                      Configure seu perfil
+                    </a>{' '}para acompanhar progresso e responder exercícios.
                   </p>
                 </div>
               )}
 
-              {exercises.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: 'var(--space-16)',
-                    color: 'var(--color-ink-tertiary)',
-                    fontSize: 'var(--text-sm)',
-                    background: 'var(--color-canvas-soft)',
-                    borderRadius: 'var(--radius-xl)',
-                    border: '1px dashed var(--color-border-strong)',
-                  }}
-                >
-                  No exercises for this lesson yet.
-                </div>
-              ) : (
-                exercises.map((exercise) => (
-                  <ExerciseCard key={exercise.id} exercise={exercise} lessonId={lesson.id} />
-                ))
-              )}
+              {exercises.length > 0 && (() => {
+                const total = exercises.length;
+                const answered = exerciseScores.length;
+                const isDone = answered === total;
+
+                /* ── Summary screen ── */
+                if (isDone) {
+                  const correct = exerciseScores.filter(Boolean).length;
+                  const pct = Math.round((correct / total) * 100);
+                  const emoji = pct === 100 ? '🏆' : pct >= 70 ? '🎉' : pct >= 40 ? '💪' : '📚';
+                  return (
+                    <div style={{
+                      textAlign: 'center', padding: 'var(--space-12) var(--space-8)',
+                      background: 'var(--color-canvas-soft)', borderRadius: 'var(--radius-xl)',
+                      border: '1px solid var(--color-border)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)',
+                    }}>
+                      <div style={{ fontSize: 56 }}>{emoji}</div>
+                      <h3 style={{
+                        fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-bold)',
+                        letterSpacing: '-0.03em', color: 'var(--color-ink)', margin: 0,
+                      }}>
+                        {correct}/{total} corretas
+                      </h3>
+                      <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-secondary)', margin: 0 }}>
+                        {pct === 100
+                          ? 'Perfeito! Você acertou tudo!'
+                          : pct >= 70
+                          ? 'Ótimo trabalho! Continue praticando.'
+                          : pct >= 40
+                          ? 'Bom esforço! Revise e tente novamente.'
+                          : 'Continue estudando, você vai melhorar!'}
+                      </p>
+                      {/* Mini score dots */}
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 280 }}>
+                        {exerciseScores.map((ok, i) => (
+                          <div key={i} title={`Questão ${i + 1}`} style={{
+                            width: 28, height: 28, borderRadius: '50%',
+                            background: ok ? '#22c55e' : '#ef4444',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 13, color: '#fff', fontWeight: 600,
+                          }}>
+                            {ok ? '✓' : '✗'}
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <Button
+                          variant="secondary"
+                          onClick={() => { setExerciseIndex(0); setExerciseScores([]); }}
+                        >
+                          Tentar novamente
+                        </Button>
+                        <Button onClick={() => setShowExercises(false)}>← Voltar aos slides</Button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                /* ── Carousel ── */
+                const current = exercises[exerciseIndex];
+                return (
+                  <>
+                    {/* Progress header */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: 'var(--space-3) var(--space-4)',
+                      background: 'var(--color-canvas-soft)', borderRadius: 'var(--radius-lg)',
+                      border: '1px solid var(--color-border)',
+                    }}>
+                      <span style={{
+                        fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)',
+                        color: 'var(--color-ink-secondary)', letterSpacing: '-0.01em',
+                      }}>
+                        Questão{' '}
+                        <span style={{ color: 'var(--color-ink)' }}>{exerciseIndex + 1}</span>
+                        {' '}/{' '}{total}
+                      </span>
+                      {/* Dot indicators */}
+                      <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                        {exercises.map((_, i) => {
+                          const isAnswered = i < answered;
+                          const isOk = isAnswered ? exerciseScores[i] : undefined;
+                          const isCurrent = i === exerciseIndex;
+                          return (
+                            <div
+                              key={i}
+                              title={`Questão ${i + 1}`}
+                              style={{
+                                width: isCurrent ? 20 : 8,
+                                height: 8,
+                                borderRadius: 'var(--radius-full)',
+                                background: isOk === true
+                                  ? '#22c55e'
+                                  : isOk === false
+                                  ? '#ef4444'
+                                  : isCurrent
+                                  ? 'var(--color-ink)'
+                                  : 'var(--color-border-strong)',
+                                transition: 'all .25s ease',
+                                flexShrink: 0,
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Exercise card */}
+                    <ExerciseCard
+                      key={current.id}
+                      exercise={current}
+                      lessonId={lesson.id}
+                      onAnswered={(isCorrect) => {
+                        setExerciseScores((prev) => [...prev, isCorrect]);
+                        if (exerciseIndex + 1 < total) {
+                          setExerciseIndex((i) => i + 1);
+                        }
+                        // if last exercise, answered array length will equal total → summary shows
+                      }}
+                    />
+                  </>
+                );
+              })()}
             </div>
           )}
         </>

@@ -24,9 +24,10 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
         if (emailResult.IsFailure)
             return Result.Failure<Guid>(emailResult.Error);
 
-        var alreadyExists = await _userRepository.ExistsByEmailAsync(emailResult.Value, cancellationToken);
-        if (alreadyExists)
-            return Result.Failure<Guid>(new Error("User.AlreadyExists", $"A user with email '{request.Email}' already exists."));
+        // If email already registered, return existing user's ID (upsert / recovery flow)
+        var existing = await _userRepository.GetByEmailAsync(emailResult.Value, cancellationToken);
+        if (existing is not null)
+            return Result.Success(existing.Id);
 
         var userResult = User.Create(request.Name, request.Email);
         if (userResult.IsFailure)
